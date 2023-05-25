@@ -1,8 +1,8 @@
 <?php
 /* 
-Plugin Name: Multi-File Text Upload with Post Status
-Description: Allows the user to upload multiple .txt and .md files and create new posts from them with different post status.
-Version: 2.2.1
+Plugin Name: Multi-File Text Upload with Post Status and Permalink URLs
+Description: Allows the user to upload multiple .txt and .md files and create new posts from them with different post status. Displays the permalink urls of all the uploaded posts.
+Version: 2.3.0
 */
 
 // Add a new admin menu item for the file upload
@@ -21,6 +21,7 @@ add_action( 'admin_menu', 'mftu_add_menu_item' );
 // Handle the file upload
 function mftu_handle_upload() {
   $num_posts = 0;
+  $post_urls = array();
 
   if ( isset( $_FILES['txt_files'] ) ) {
     $uploaded_files = $_FILES['txt_files'];
@@ -33,7 +34,7 @@ function mftu_handle_upload() {
         $file_contents = file_get_contents( $file_tmp_name );
 
         // Convert markdown headings to HTML h tags
-        $lines = explode( "\n", $file_contents );
+       $lines = explode( "\n", $file_contents );
         $parsed_content = '';
         
         // Remove the first line from the input file, which will be used as the headline
@@ -56,7 +57,7 @@ function mftu_handle_upload() {
           if ( preg_match( '/^\*+/', $line ) ) {
             // If the line starts with one or more star symbols, treat it as a heading
             $text = str_replace( '*', '', $line );
-            $heading_level = min( strlen( $line ) - strlen( ltrim( $line, '*' ) ), 6 );
+            $heading_level = min( strlen( $line ) - strlen( ltrim( $line, '*' ) ), 6);
             $parsed_content .= '<h' . $heading_level . '>' . $text . '</h' . $heading_level . '>';
           } elseif ( strpos( $line, '#' ) === 0 ) {
             // If the line starts with one or more hash symbols, treat it as a heading
@@ -86,8 +87,11 @@ function mftu_handle_upload() {
           'post_status' => $post_status
         ) );
 
+       // Get the permalink URL of the newly created post and add it to the list of URLs
         if ( $post_id ) {
           $num_posts++;
+          $post_url = get_permalink( $post_id );
+          array_push( $post_urls, $post_url );
         }
       } elseif ( $file_extension === 'txt' ) {
         // ...
@@ -95,9 +99,14 @@ function mftu_handle_upload() {
     }
   }
 
-  // Display the success message
+  // Display the success message and the list of post URLs
   if ( $num_posts > 0 ) {
-    printf( '<div class="updated"><p>Successfully posted %d posts.</p></div>', $num_posts );
+    printf( '<div class="updated"><p>Successfully posted %d posts.</p>', $num_posts );
+    printf( '<p>Permalink URLs:</p><ul>' );
+    foreach ( $post_urls as $url ) {
+      printf( '<li><a href="%s">%s</a></li>', $url, $url );
+    }
+    printf( '</ul></div>' );
   }
 
   // Display the file upload form
