@@ -2,7 +2,7 @@
 /* 
 Plugin Name: Multi-File Text Upload with Post Status
 Description: Allows the user to upload multiple .txt and .md files and create new posts from them with different post status.
-Version: 2.2
+Version: 2.2.1
 */
 
 // Add a new admin menu item for the file upload
@@ -111,7 +111,7 @@ function mftu_handle_upload() {
       <?php wp_dropdown_categories( array( 'name' => 'category', 'id' => 'mftu-category', 'selected' => get_option( 'mftu_category', 0 ) ) ); ?>
       <br><br>
       <label for="author">Author:</label>
-      <?php wp_dropdown_users( array( 'name' => 'author' ) ); ?>
+      <?php wp_dropdown_users( array( 'name' => 'author', 'who' => 'authors' ) ); ?>
       <br><br> 
       <label for="post_status">Post Status:</label>
       <select name="post_status" id="post-status">
